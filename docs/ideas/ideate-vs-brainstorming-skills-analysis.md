@@ -25,8 +25,8 @@ raw idea ──► idea-refine ──► approved one-pager ──► brainstorm
 
 For SpecScore/Synchestra, the right move is **neither fork nor merge-into-one**. Build a **two-skill pair** with a shared SpecScore spine:
 
-1. `sdd-ideate` — divergent/convergent ideation → produces a **SpecScore Idea** artifact (pre-feature).
-2. `sdd-design` — intent-to-design with hard gates and self-review → produces a **SpecScore Feature** artifact (feature with requirements + acceptance criteria).
+1. `specscore:ideate` — divergent/convergent ideation → produces a **SpecScore Idea** artifact (pre-feature).
+2. `specscore:design` — intent-to-design with hard gates and self-review → produces a **SpecScore Feature** artifact (feature with requirements + acceptance criteria).
 
 Both emit Synchestra-addressable artifacts (YAML front-matter, `specscore:` annotations, machine-readable status).
 
@@ -152,15 +152,15 @@ Saved to `docs/ideas/<name>.md` *after user confirmation* (optional, not forced)
 
 ### Two Plausible Paths
 
-**Path A — Single fat skill** (`sdd-ideate-and-design`).
+**Path A — Single fat skill** (`specscore:ideate-and-design`).
 - Pros: One invocation; one artifact; less context-switching.
 - Cons: Context pollution (creative divergence in the same conversation as spec self-review); confusing mental model; violates single-responsibility; gates become ambiguous (when does the `<HARD-GATE>` apply?).
 
 **Path B — Two composable skills with a shared backbone** ← *recommended*.
-- `sdd-ideate` produces a SpecScore **Idea** artifact.
-- `sdd-design` consumes an Idea (or a raw intent) and produces a SpecScore **Feature** artifact.
+- `specscore:ideate` produces a SpecScore **Idea** artifact.
+- `specscore:design` consumes an Idea (or a raw intent) and produces a SpecScore **Feature** artifact.
 - Each skill has one job, matches one stage of the SpecScore hierarchy, and is independently invocable.
-- Synchestra orchestrates the handoff: when an Idea is promoted, it triggers `sdd-design`.
+- Synchestra orchestrates the handoff: when an Idea is promoted, it triggers `specscore:design`.
 
 I recommend **Path B**. The two skills solve genuinely different problems — conflating them loses the disciplined gating of `brainstorming` and the creative pressure of `idea-refine`. Keep them separate, but give them a shared spec vocabulary and shared philosophy section.
 
@@ -168,8 +168,8 @@ I recommend **Path B**. The two skills solve genuinely different problems — co
 
 | Skill | Base | Grafts From the Other |
 |---|---|---|
-| `sdd-ideate` | **`idea-refine`** (3-phase structure, frameworks/criteria as sidecar files, tone) | From `brainstorming`: scope-decomposition gate, mandatory artifact write (not optional), spec self-review pass on the Idea doc, `<HARD-GATE>` against jumping to design without an approved Idea |
-| `sdd-design` | **`brainstorming`** (checklist flow, HARD-GATE, self-review, reviewer subagent prompt, visual companion) | From `idea-refine`: named divergence lenses for the 2–3 approaches step, painkiller-vs-vitamin test in the design review, explicit assumption audit section, "Not Doing" as a required design section |
+| `specscore:ideate` | **`idea-refine`** (3-phase structure, frameworks/criteria as sidecar files, tone) | From `brainstorming`: scope-decomposition gate, mandatory artifact write (not optional), spec self-review pass on the Idea doc, `<HARD-GATE>` against jumping to design without an approved Idea |
+| `specscore:design` | **`brainstorming`** (checklist flow, HARD-GATE, self-review, reviewer subagent prompt, visual companion) | From `idea-refine`: named divergence lenses for the 2–3 approaches step, painkiller-vs-vitamin test in the design review, explicit assumption audit section, "Not Doing" as a required design section |
 
 ---
 
@@ -204,7 +204,7 @@ This split is a core SpecScore convention and one of the deliberate overrides of
 | `brainstorming` → `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` | `spec/features/<slug>/README.md` | Dates belong in front-matter; slugs are stable IDs; Features have sub-artifacts (requirements) |
 | Either skill producing freeform markdown | YAML front-matter + schema-validated body | Required for `specscore lint` + Synchestra addressability |
 
-This convention should be codified in a shared spine file (`skills/shared/path-conventions.md`) that both `sdd-ideate` and `sdd-design` reference, so future SDD skills don't drift.
+This convention should be codified in a shared spine file (`skills/shared/path-conventions.md`) that both `specscore:ideate` and `specscore:design` reference, so future SDD skills don't drift.
 
 | Artifact | Location | Schema |
 |---|---|---|
@@ -221,13 +221,13 @@ Both artifacts are **lintable by `specscore lint`**, which means:
 
 - **Addressable artifacts:** Every Idea and Feature has a stable ID. Synchestra agents reference them by ID in plans, tasks, and PRs.
 - **Status lifecycle:** `Draft → Under Review → Approved → Promoted → Archived` (Ideas); `Draft → Approved → In Progress → Shipped` (Features). Synchestra owns status transitions.
-- **Orchestration hooks:** `sdd-ideate` publishes an `idea.drafted` event; `sdd-design` can be triggered by `idea.approved`. Both emit `artifact.written` events for Rehearse to pick up.
+- **Orchestration hooks:** `specscore:ideate` publishes an `idea.drafted` event; `specscore:design` can be triggered by `idea.approved`. Both emit `artifact.written` events for Rehearse to pick up.
 - **Traceability:** `specscore:` source annotations link code back to requirements back to features back to the originating Idea. A PR touching a feature that traces to an Archived Idea fails CI.
-- **Parallelism:** Because skills are independent, Synchestra can dispatch multiple `sdd-ideate` sessions in parallel on different raw ideas (natural fit with Superpowers' `dispatching-parallel-agents`).
+- **Parallelism:** Because skills are independent, Synchestra can dispatch multiple `specscore:ideate` sessions in parallel on different raw ideas (natural fit with Superpowers' `dispatching-parallel-agents`).
 
 ### 7.3 Things to Deliberately Drop from the Upstream Skills
 
-- **Visual companion** (from `brainstorming`): keep as optional reference, don't ship by default. Most SDD work is textual; the Node server is a heavy dep. Opt-in via a separate `sdd-design-visual` companion skill.
+- **Visual companion** (from `brainstorming`): keep as optional reference, don't ship by default. Most SDD work is textual; the Node server is a heavy dep. Opt-in via a separate `specscore:design-visual` companion skill.
 - **`docs/superpowers/specs/YYYY-MM-DD-topic-design.md` naming** (from `brainstorming`): replace with SpecScore's `spec/features/<slug>/` layout. Dates go in front-matter, not filenames.
 - **"Save optional" behavior** (from `idea-refine`): make the Idea artifact mandatory. Unsaved ideation is waste.
 
@@ -235,11 +235,11 @@ Both artifacts are **lintable by `specscore lint`**, which means:
 
 ## 8. Proposed SKILL.md Outline for the Merged Pair
 
-### 8.1 `sdd-ideate/SKILL.md` (Draft Outline)
+### 8.1 `skills/specscore-ideate/SKILL.md` (Draft Outline — skill name `specscore:ideate`)
 
 ```markdown
 ---
-name: sdd-ideate
+name: specscore:ideate
 description: |
   Refines raw ideas into SpecScore Idea artifacts through divergent and
   convergent thinking. Produces a lintable pre-spec one-pager that can be
@@ -255,7 +255,7 @@ structured divergent and convergent thinking.
 
 ## Hard Gate
 <HARD-GATE>
-Do NOT invoke sdd-design, writing-plans, or any implementation skill until
+Do NOT invoke specscore:design, writing-plans, or any implementation skill until
 an Idea artifact has been written to spec/ideas/<slug>.md, passes
 `specscore lint`, and the user has approved its Recommended Direction.
 Ideas that can't be lint-clean aren't ready to be designed.
@@ -366,7 +366,7 @@ re-review.
 - No assumptions surfaced
 - "Not Doing" section skipped
 - Saving without user approval
-- Attempting to skip ahead to sdd-design without lint-clean artifact
+- Attempting to skip ahead to specscore:design without lint-clean artifact
 
 ## References
 - references/frameworks.md       (SCAMPER, HMW, First Principles, JTBD,
@@ -376,11 +376,11 @@ re-review.
 - references/synchestra-events.md  (which events this skill emits)
 ```
 
-### 8.2 `sdd-design/SKILL.md` (Draft Outline)
+### 8.2 `skills/specscore-design/SKILL.md` (Draft Outline — skill name `specscore:design`)
 
 ```markdown
 ---
-name: sdd-design
+name: specscore:design
 description: |
   Turns an approved SpecScore Idea (or a clear intent) into a SpecScore
   Feature with requirements and acceptance criteria. Gates implementation
@@ -404,12 +404,12 @@ implementation skill until:
   4. The user has explicitly approved the written Feature.
 
 This applies to EVERY project, regardless of perceived simplicity. The
-only skill invoked after sdd-design is writing-plans.
+only skill invoked after specscore:design is writing-plans.
 </HARD-GATE>
 
 ## When to Use
 - A SpecScore Idea is approved and ready to become a Feature.
-- User has a clear buildable intent (may skip sdd-ideate if truly clear).
+- User has a clear buildable intent (may skip specscore:ideate if truly clear).
 - Changing behavior of an existing Feature (creates an updated revision).
 
 ## Anti-Pattern: "This Is Too Simple To Need A Design"
@@ -421,14 +421,14 @@ cost the most. Design can be short; it cannot be skipped.
 - If triggered from an approved Idea, load it and list Idea assumptions
   that the Feature must validate.
 - If no Idea exists, ask: "Is this ready to design or should we ideate
-  first?" (Don't force sdd-ideate if the user has high conviction.)
+  first?" (Don't force specscore:ideate if the user has high conviction.)
 
 ## Checklist
 1. Explore project context (files, recent commits, related Features)
 2. Scope decomposition check (multiple subsystems → multiple Features)
 3. Offer visual companion if visual questions are ahead (own message)
 4. Ask clarifying questions — one at a time, multiple-choice preferred
-5. Propose 2–3 approaches using sdd-ideate lenses where useful
+5. Propose 2–3 approaches using specscore:ideate lenses where useful
 6. Present design sections, get approval after each
 7. Author the Feature artifact (README.md + requirements/)
 8. Run lint + inline self-review
@@ -497,14 +497,14 @@ Co-located so both skills stay DRY:
 
 ```
 skills/
-├── sdd-ideate/
+├── specscore-ideate/          ← dir name uses `-`; skill name is `specscore:ideate`
 │   ├── SKILL.md
 │   └── references/
 │       ├── frameworks.md              ← from idea-refine
 │       ├── refinement-criteria.md     ← from idea-refine
 │       ├── examples.md                ← adapted from idea-refine
 │       └── synchestra-events.md       ← NEW
-├── sdd-design/
+├── specscore-design/          ← dir name uses `-`; skill name is `specscore:design`
 │   ├── SKILL.md
 │   └── references/
 │       ├── reviewer-prompt.md         ← from brainstorming
@@ -527,38 +527,78 @@ skills/
 | Single skill vs. pair | **Pair** | Different jobs, different gates, different artifacts. Conflating loses discipline. |
 | Mandatory vs. optional artifact | **Mandatory** (both skills) | Unsaved ideation is waste; Synchestra needs addressable artifacts. |
 | Freeform markdown vs. schema'd | **Schema'd with YAML front-matter** | SpecScore is a spec format, not a style guide. Lint > vibes. |
-| Visual companion | **Optional, in sdd-design only** | Heavy dep; not useful for pure ideation; opt-in when UX matters. |
+| Visual companion | **Optional, in specscore:design only** | Heavy dep; not useful for pure ideation; opt-in when UX matters. |
 | Question cadence | **Contextual** | Batch in Phase 1 (user has context); one-at-a-time in Phase 2+ design. Document in `shared/question-cadence.md`. |
-| "Too simple" defense | **In sdd-design only** | sdd-ideate is explicitly for low-commitment exploration; gating it would kill low-stakes ideation. |
-| Reviewer subagent | **sdd-design only** | The cost of a bad Feature spec is high; the cost of a bad Idea is low. |
-| Handoff terminal | **sdd-ideate → (optional) sdd-design → writing-plans** | Mirrors Superpowers' terminal-invocation model. |
+| "Too simple" defense | **In specscore:design only** | specscore:ideate is explicitly for low-commitment exploration; gating it would kill low-stakes ideation. |
+| Reviewer subagent | **specscore:design only** | The cost of a bad Feature spec is high; the cost of a bad Idea is low. |
+| Handoff terminal | **specscore:ideate → (optional) specscore:design → writing-plans** | Mirrors Superpowers' terminal-invocation model. |
 
 ---
 
-## 10. Open Questions (to resolve before writing the skills)
+## 10. Resolved Questions and Decisions
 
-1. **Idea promotion mechanics.** When an Idea is promoted, who owns the bidirectional link? Is `promotes_to` edited by the Idea author, or auto-populated by Synchestra when the Feature is created?
-2. **Revision semantics.** If a Feature's design changes substantially post-approval, does it supersede (new file) or revise in place (git history)? SpecScore lint should care about this.
-3. **Lint rules at which phase.** Should `sdd-ideate` use the same `specscore lint` binary, or a lightweight Idea-only lint subset? Treating Ideas as first-class lintable artifacts is stronger, but might slow the skill.
-4. **Event schema.** `idea.drafted`, `idea.approved`, `feature.designed`, `feature.approved` — define the payload schemas centrally in `shared/synchestra-events.md`.
-5. **Parallel ideation.** Can multiple Ideas reference the same Problem Statement (competing hypotheses)? If yes, how does Synchestra resolve when one is promoted?
-6. **Visual companion alternative.** Instead of shipping a Node server, is there a lighter-weight diagram-embedding approach (Mermaid, ASCII, SVG-in-markdown) that covers 80% of the value without the runtime dep?
-7. **Integration with Rehearse.** Should `sdd-design` emit a test-scaffold stub (one test file per AC) as a side effect, so Rehearse has something to run day one?
-8. **Naming.** `sdd-ideate` vs. `ideate` vs. `refine-idea` vs. `specscore:ideate`. Same for the design skill. Pick a naming convention that reads well alongside existing Superpowers skill names.
+1. **Idea promotion mechanics — RESOLVED.** An Idea may have empty `promotes_to` in `Draft` and `Approved` states. When one or more Features are created from an Idea, Synchestra transitions its status to `Specified` and **auto-populates `promotes_to`** with the list of Feature IDs. The Idea author never edits `promotes_to` manually. Lifecycle: `Draft → Under Review → Approved → Specified → Archived`.
+
+2. **Revision semantics — RESOLVED.** Features **revise in place**; git history is the record of design changes. A revision does not create a new slug or file. `supersedes:` is reserved for the rare case where a Feature is replaced wholesale by a differently-scoped successor (e.g., the original Feature is archived). Lint should tolerate evolution of a Feature's body across revisions as long as the schema remains valid.
+
+3. **Lint granularity — RESOLVED.** `specscore lint` supports **single-file linting** (e.g., `specscore lint spec/ideas/<slug>.md`) in addition to whole-tree. The skills invoke single-file lint on the artifact they just wrote. No separate Idea-only lint subset is needed — the lint rule engine dispatches by artifact `type:` in the front-matter.
+
+4. **Event schema — RESOLVED.** Central file: `shared/synchestra-events.md`. Emitted by the skills: `idea.drafted`, `idea.approved`, `idea.specified`, `feature.designed`, `feature.approved`. Payload shapes defined in that file.
+
+5. **Parallel / competing Ideas — OUT OF SCOPE.** For now, users manage competing-hypothesis scenarios manually (archive the loser, keep the winner). Revisit if/when it becomes a pattern.
+
+6. **Visual companion — STILL OPEN.** Deferred to a dedicated session. See Open Question section below for clarifications on what "shipped node server" actually means in upstream `brainstorming` and what the SpecScore alternatives could be.
+
+7. **Rehearse integration — DECIDED (partial).** Rehearse test generation is **optional**. The skill (`specscore-design`) should attempt a lightweight heuristic decision: does this Feature have clear observable Given/When/Then scenarios that map to automatable tests (API, CLI, pure function, UI with stable selectors)? If yes, scaffold stub test files (one per AC) and mark them `pending`. If the Feature is abstract, documentation-only, or has untestable outcomes, skip scaffolding and note "No Rehearse stubs generated — reason: …" in the Feature artifact. User can always override the heuristic.
+
+8. **Naming — DECIDED.** Primary namespaced form: **`specscore:ideate`** and **`specscore:design`**. Short slash-command aliases: `/ideate` and `/design`. (Not `/brainstorm` — we're explicitly distancing from the Superpowers name since our `specscore:design` plays both ideation-convergence *and* design-gating roles differently from Superpowers `brainstorming`.)
 
 ---
 
-## 11. Action Items
+## 11. Still-Open Questions
 
-| P | Action |
-|---|---|
-| P0 | Resolve Open Question 1, 2, 4 — these unblock schema authoring |
-| P0 | Write `shared/specscore-lint-rules.md` with rules both skills assume |
-| P0 | Write `shared/path-conventions.md` codifying `spec/` vs `docs/` split |
-| P1 | Draft `sdd-ideate/SKILL.md` per outline in §8.1 |
-| P1 | Draft `sdd-design/SKILL.md` per outline in §8.2 |
-| P1 | Port `frameworks.md` and `refinement-criteria.md` verbatim from `idea-refine` (MIT/permissive license permitting) |
-| P2 | Port `reviewer-prompt.md` from `brainstorming` (adapt to SpecScore feature schema) |
-| P2 | Write `synchestra-events.md` payload specs |
-| P3 | Decide on visual-companion inclusion (Open Question 6) |
-| P3 | Prototype Rehearse integration (Open Question 7) |
+### 11.1 Visual Companion — full context
+
+**Clarification on "shipped node server":** Upstream `obra/superpowers/skills/brainstorming` does **not** bundle a Node.js runtime binary. It ships:
+
+- `scripts/server.cjs` — a CommonJS Node.js script (an HTTP server that watches a content directory and streams the newest HTML fragment to the user's browser, plus records click/selection events to a state dir).
+- `scripts/start-server.sh` / `stop-server.sh` — bash wrappers that launch/terminate the `.cjs` script via the user's locally installed `node` binary (`#!/usr/bin/env bash` + `node server.cjs …`).
+- `scripts/frame-template.html` — the page shell (header, CSS, selection indicator, helper script injection).
+- `scripts/helper.js` — client-side helper loaded into the user's browser.
+
+In other words: **the user must have Node.js installed on their machine**. The skill doesn't ship a runtime — it assumes one. Session files land in `<project>/.superpowers/brainstorm/<session-id>/{content,state}/` when `--project-dir` is passed.
+
+**Open sub-questions for a separate session:**
+
+1. Is a local HTTP server + browser the right UX for SpecScore design sessions, or would simpler alternatives cover the same ground? Candidates:
+   - **Mermaid / PlantUML embedded in the Feature markdown** — rendered by the user's IDE or a viewer; zero runtime.
+   - **SVG fragments committed alongside the Feature** — static artifacts, reviewable in PRs.
+   - **Claude Code / Cursor inline image rendering** — platform-native visual return.
+   - **Optional companion (keep upstream as-is, opt-in)** — accept the Node dependency only when the user enables it.
+   - **Reuse upstream `obra/superpowers` visual companion directly** — if the user has `superpowers` installed alongside our skills, `specscore:design` can simply invoke the upstream `brainstorming` skill's visual-companion workflow (or delegate to it) rather than forking/vendoring. Requires: (a) confirming the upstream companion can be triggered standalone without the full `brainstorming` flow, (b) agreeing a contract for where session files land (their `.superpowers/brainstorm/` vs our preferred location), (c) deciding how `specscore:design` detects upstream availability (file existence check, skill-registry query). Biggest win: zero maintenance burden on our side. Biggest risk: coupling our skills to an external skill pack's lifecycle.
+2. If we do adopt something server-based, does it need to integrate with Synchestra (so remote agents can render visuals for a watching user)?
+3. How do visual mockups relate to SpecScore lintable artifacts? (Probably not lintable, live alongside as `spec/features/<slug>/assets/*`.)
+4. Licensing — can we vendor `server.cjs` / `frame-template.html` from `obra/superpowers` under their license, or do we need a clean-room rewrite?
+
+### 11.2 Other Open
+
+- **Rehearse heuristic detail.** What exactly triggers the "testable AC" heuristic? (Candidate signals: AC mentions a CLI command, an HTTP endpoint, a pure-function input/output, or a UI element with a stable ID.) Needs a written rubric in `shared/rehearse-heuristic.md` before `specscore-design` can implement it reliably.
+- **`supersedes` vs in-place revision.** Draw the line in lint: when does a change force a new slug (supersedes) vs. stay in place? Probably a rule like "scope change that invalidates existing ACs → new slug; everything else → in place."
+
+---
+
+## 12. Action Items
+
+| P | Action | Status |
+|---|---|---|
+| P0 | Write `shared/specscore-lint-rules.md` with rules both skills assume | ☐ |
+| P0 | Write `shared/path-conventions.md` codifying `spec/` vs `docs/` split | ☐ |
+| P0 | Write `shared/synchestra-events.md` payload specs | ☐ |
+| P0 | Write `shared/philosophy.md` and `shared/question-cadence.md` | ☐ |
+| P1 | Draft `skills/specscore-ideate/SKILL.md` per outline in §8.1 | ☐ |
+| P1 | Draft `skills/specscore-design/SKILL.md` per outline in §8.2 | ☐ |
+| P1 | Port `frameworks.md` and `refinement-criteria.md` from upstream `idea-refine` (MIT/permissive license permitting) | ☐ |
+| P2 | Port `reviewer-prompt.md` from upstream `brainstorming` and adapt to SpecScore Feature schema | ☐ |
+| P2 | Write `shared/rehearse-heuristic.md` (Q7 implementation rubric) | ☐ |
+| P3 | Visual-companion decision session (Q6) | ☐ |
+| P3 | Draw `supersedes` vs in-place-revision line for lint | ☐ |
