@@ -11,6 +11,7 @@ A studio is a workspace where something gets made end-to-end. Spec Studio is the
 Alongside it:
 
 - [**SpecScore**](https://specscore.org/) — the open protocol every spec artifact conforms to.
+  - [**Rehearse**](https://rehearse.synchestra.io/) — the markdown-native test framework for SpecScore specs. Studio scaffolds Rehearse test stubs from acceptance criteria.
 - [**Synchestra**](https://synchestra.io/) — the engine that runs dispatched work. Headless; you never really "use" it directly.
 - [**Synchestra Hub**](https://hub.synchestra.io/) — the portfolio view. When you want to step back from this project and see all your projects and runners, that's Hub.
 
