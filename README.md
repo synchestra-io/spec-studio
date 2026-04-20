@@ -1,20 +1,57 @@
 # Spec Studio
 
-**Spec Studio — spec-driven development, by Synchestra.**
+**Spec-driven development, by Synchestra.**
 
-About
-AI skills & Web UI for efficient spec-driven development: specify, plan, build, verify, recap, review, ship.
+AI skills and Web UI for efficient spec-driven development — the full lifecycle: **specify, plan, build, verify, recap, review, ship.** Spec Studio turns vague ideas into lintable, testable specifications and gates implementation on those specifications being clear, complete, and approved.
 
-## Naming
+## Why a studio
 
-### Product name — why "Spec Studio"
+A studio is where a composition is made before it's performed. Spec Studio is where you compose — an ideation and authoring environment for the spec itself, not yet the code. The spec is the score; Synchestra performs it.
 
-- **Differentiates upward from GitHub Spec Kit.** "Studio" reads as *environment / full workspace*; "Kit" reads as *onboarding toolkit*. Spec Studio sits a category above.
-- **Dev-familiar pattern.** "X Studio" is well-understood in developer tooling (Android Studio, Visual Studio, R Studio) — zero teaching cost on first read.
-- **Ecosystem metaphor.** "Studio" carries a second reading inside the Synchestra musical family — the *recording studio* where a composition is made. This binds the product line into a coherent three-act workflow: *compose* in Spec Studio → *score* with SpecScore → *perform* with Synchestra.
+That's the shape of the ecosystem:
 
-### Repository name — why `spec-studio` (not `ai-plugin-spec-studio`)
+- **Compose** in Spec Studio — refine ideas, design features, write acceptance criteria.
+- **Score** with [SpecScore](https://specscore.org/) — the open protocol every artifact conforms to.
+- **Perform** with [Synchestra](https://synchestra.io/) — the engine that dispatches work against the score.
 
-Sibling plugins in this workspace use the `ai-plugin-` prefix (`ai-plugin-synchestra`, `ai-plugin-specscore`) because they wrap *separate* core products (`synchestra/`, `specscore/`) where the prefix distinguishes plugin-form from core-form. Spec Studio has no separate core — it *is* the high-level skills plugin that orchestrates `synchestra-cli` and `specscore-cli`. Following the GitHub Spec Kit precedent (`github/spec-kit`, not `github/ai-plugin-spec-kit`), when the plugin *is* the product, the repo takes the brand name directly.
+## What's in the box
 
-Full decision record and rejected alternatives: `synchestra-io/synchestra-marketing/decisions/2026-04-19-spec-studio-naming.md`
+Spec Studio ships as a set of Claude Code skills that sit on top of the `specscore` and `synchestra` CLIs. Today:
+
+| Skill | Purpose |
+|---|---|
+| `specscore:ideate` | Refine raw ideas into SpecScore Idea artifacts through structured divergent/convergent thinking. Gates on a lint-clean `spec/ideas/<slug>.md` that the user has approved. |
+| `specscore:design` | Turn an approved Idea into a SpecScore Feature with requirements and `Given / When / Then` acceptance criteria at `spec/features/<slug>/`. Gates implementation until the Feature is lint-clean and approved. |
+
+More skills covering the rest of the lifecycle (plan, build, verify, recap, review, ship) are on the roadmap, alongside a web authoring UI that will grow inside [Synchestra Hub](https://hub.synchestra.io/).
+
+## Principles
+
+Spec Studio's skills share a common philosophy:
+
+- **Types beat vibes.** If `specscore lint` passes, you can build on it. If it doesn't, you can't.
+- **Gates are non-negotiable.** No amount of perceived simplicity bypasses a hard gate. Ideate before design, design before plan, plan before code.
+- **Unsaved ideation is waste.** If it's worth thinking about, it's worth a lint-clean artifact in `spec/`.
+- **Say no to 1,000 things.** The "Not Doing" list is the most valuable part of any artifact.
+- **Be honest, not supportive.** Skills push back on weak ideas with specificity and kindness. No yes-machines.
+
+See [`skills/shared/philosophy.md`](./skills/shared/philosophy.md) for the full set.
+
+## Where it fits
+
+| | What it does | Layer |
+|---|---|---|
+| [SpecScore](https://specscore.org/) | The protocol: feature/requirement/AC format, lint, LSP | Open source |
+| [Synchestra](https://synchestra.io/) | The engine: CLI, daemon, runners | Open source |
+| **Spec Studio** | The SDD workflow — AI skills in your IDE today, web authoring UI on the way | **Open source** |
+| [Synchestra Hub](https://hub.synchestra.io/) | Portfolio + runtime UI for remote execution | Hosted |
+
+Spec Studio works standalone with Claude Code. Paired with Synchestra Hub, the same skills can dispatch long-running or sandboxed work to remote runners without leaving your editor.
+
+## Status
+
+**Version 0.0.1 — early.** The `ideate` and `design` skills are stable enough to use on real work; the rest of the lifecycle is in progress. Expect sharp edges, breaking changes, and active iteration.
+
+## License
+
+MIT. See [`LICENSE`](./LICENSE).
